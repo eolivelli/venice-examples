@@ -1,20 +1,25 @@
 package org.example;
 
-import com.linkedin.venice.client.factory.CachingVeniceStoreClientFactory;
-import com.linkedin.venice.client.factory.VeniceStoreClientFactory;
 import com.linkedin.venice.client.store.AvroGenericStoreClient;
 import com.linkedin.venice.client.store.ClientConfig;
+import com.linkedin.venice.client.store.ClientFactory;
+
 
 public class Main {
     public static void main(String[] args) {
         try {
-            ClientConfig clientConfig = new ClientConfig();
+            String storeName = "venice-store";
+            ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
             clientConfig.setVeniceURL("http://venice-router:7777");
-            VeniceStoreClientFactory factory
-                    = new CachingVeniceStoreClientFactory(clientConfig);
-            AvroGenericStoreClient<Object, Object> store = factory.getAndStartAvroGenericStoreClient("venice-store");
+            clientConfig.setForceClusterDiscoveryAtStartTime(true);
+            AvroGenericStoreClient<Object, Object> store = ClientFactory.getAndStartGenericAvroClient(clientConfig);
+            System.out.println("Store: "+store);
+            Object o = store.get("1").get();
+            System.out.println("Result "+o);
+            store.close();
         } catch (Throwable t) {
             t.printStackTrace();
+            System.exit(-1);
         }
 
     }
