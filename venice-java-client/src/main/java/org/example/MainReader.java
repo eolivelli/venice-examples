@@ -17,7 +17,7 @@ public class MainReader {
             clientConfig.setForceClusterDiscoveryAtStartTime(true);
             AvroGenericStoreClient<Object, Object> store = ClientFactory.getAndStartGenericAvroClient(clientConfig);
             System.out.println("Store: "+store);
-            Object o = store.get("foo").get();
+            Object o = store.get("one").get();
             System.out.println("Result "+o);
 
             store.close();

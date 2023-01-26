@@ -1,0 +1,4 @@
+{
+"veniceRouterUrl":"http://venice-controller:5555",
+"veniceStore":"test-store"
+}
