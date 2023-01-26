@@ -1,26 +1,25 @@
 package org.example;
 
 import com.linkedin.venice.meta.Version;
-import com.linkedin.venice.samza.VeniceSystemFactory;
-import com.linkedin.venice.samza.VeniceSystemProducer;
 import com.linkedin.venice.utils.Utils;
 import org.apache.samza.config.MapConfig;
+import org.example.simplewriter.VeniceSystemFactory;
+import org.example.simplewriter.VeniceSystemProducer;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static com.linkedin.venice.CommonConfigKeys.SSL_ENABLED;
-import static com.linkedin.venice.samza.VeniceSystemFactory.DEPLOYMENT_ID;
-import static com.linkedin.venice.samza.VeniceSystemFactory.DOT;
-import static com.linkedin.venice.samza.VeniceSystemFactory.SYSTEMS_PREFIX;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_AGGREGATE;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_CHILD_CONTROLLER_D2_SERVICE;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_CHILD_D2_ZK_HOSTS;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_PARENT_CONTROLLER_D2_SERVICE;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_PARENT_D2_ZK_HOSTS;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_PUSH_TYPE;
-import static com.linkedin.venice.samza.VeniceSystemFactory.VENICE_STORE;
-
+import static org.example.simplewriter.VeniceSystemFactory.DEPLOYMENT_ID;
+import static org.example.simplewriter.VeniceSystemFactory.DOT;
+import static org.example.simplewriter.VeniceSystemFactory.SYSTEMS_PREFIX;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_AGGREGATE;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_CHILD_CONTROLLER_D2_SERVICE;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_CHILD_D2_ZK_HOSTS;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_PARENT_CONTROLLER_D2_SERVICE;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_PARENT_D2_ZK_HOSTS;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_PUSH_TYPE;
+import static org.example.simplewriter.VeniceSystemFactory.VENICE_STORE;
 
 public class MainWriter {
     static {
@@ -29,18 +28,22 @@ public class MainWriter {
 
     public static void main(String[] args) {
         try {
-            String storeName = "venice-store";
+
+            String storeName = "test-store";
             String systemName = "venice";
 
             VeniceSystemFactory factory = new VeniceSystemFactory();
             VeniceSystemProducer producer = factory
-                    .getClosableProducer(systemName, new MapConfig(getSamzaConfig(storeName, systemName)), null);
+                    .getClosableProducer(systemName, new MapConfig(getConfig(storeName, systemName)), null);
 
             producer.start();
 
-            producer.put("17", "sdfsf").get();
+            producer.put("foo", "bar").get();
+            producer.flush(null);
 
-            producer.stop();
+            System.out.println("FINISHED !!");
+
+
             producer.close();
 
         } catch (Throwable t) {
@@ -50,14 +53,13 @@ public class MainWriter {
 
     }
 
-    public static final String D2_SERVICE_NAME = "ChildController";
-
+    public static final String D2_SERVICE_NAME = "ClientController";
     public static final String PARENT_D2_SERVICE_NAME = "ParentController";
 
-    private static Map<String, String> getSamzaConfig(String storeName, String systemName) {
+    private static Map<String, String> getConfig(String storeName, String systemName) {
         Map<String, String> samzaConfig = new HashMap<>();
         String configPrefix = SYSTEMS_PREFIX + systemName + DOT;
-        samzaConfig.put(configPrefix + VENICE_PUSH_TYPE, Version.PushType.STREAM.toString());
+        samzaConfig.put(configPrefix + VENICE_PUSH_TYPE, Version.PushType.INCREMENTAL.toString());
         samzaConfig.put(configPrefix + VENICE_STORE, storeName);
         samzaConfig.put(configPrefix + VENICE_AGGREGATE, "false");
         samzaConfig.put(VENICE_CHILD_D2_ZK_HOSTS, "localhost:2181");
@@ -70,4 +72,5 @@ public class MainWriter {
         samzaConfig.put(SSL_ENABLED, "false");
         return samzaConfig;
     }
+
 }
