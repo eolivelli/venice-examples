@@ -9,6 +9,10 @@ Key points about the writer side:
 Key points about the reader:
 - it uses the standard venice-thin-client API, that is based on HTTP
 
+This repository also contains a very simple [Pulsar IO Sink](pulsar-venice-sink) that allows Pulsar users to ingest data to Venice.
+
+
+
 ## Build Venice from source
 
 ```
