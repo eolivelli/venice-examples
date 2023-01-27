@@ -49,6 +49,12 @@ public class VeniceSinkConfig implements Serializable {
     private String veniceRouterUrl = "http://venice-router:7777";
 
     @FieldDoc(
+            defaultValue = "",
+            help = "The url of the ZK service used by Venice"
+    )
+    private String veniceZookeeper = "zookeeper:2181";
+
+    @FieldDoc(
         defaultValue = "",
         help = "The name of the Venice store"
     )
