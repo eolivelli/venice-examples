@@ -108,8 +108,8 @@ public class VeniceSink implements Sink<GenericObject> {
         samzaConfig.put(configPrefix + VENICE_PUSH_TYPE, Version.PushType.INCREMENTAL.toString());
         samzaConfig.put(configPrefix + VENICE_STORE, storeName);
         samzaConfig.put(configPrefix + VENICE_AGGREGATE, "false");
-        samzaConfig.put("venice.parent.d2.zk.hosts", config.getVeniceZookeeper());
-        samzaConfig.put("venice.child.d2.zk.hosts", config.getVeniceZookeeper());
+        //samzaConfig.put("venice.parent.d2.zk.hosts", config.getVeniceZookeeper());
+        //samzaConfig.put("venice.child.d2.zk.hosts", config.getVeniceZookeeper());
 
         samzaConfig.put("venice.discover.urls", this.config.getVeniceRouterUrl());
 
