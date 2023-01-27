@@ -18,6 +18,7 @@
     <modules>
        <module>venice-java-client</module>
        <module>pulsar-venice-sink</module>
+       <module>pulsar-data-generator</module>
     </modules>
 
 </project>

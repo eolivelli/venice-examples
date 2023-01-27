@@ -1,4 +1,4 @@
 {
-"veniceRouterUrl":"http://venice-controller:5555",
-"veniceStore":"test-store"
+"veniceRouterUrl":"http://venice-router:7777",
+"storeName":"test-store-persons"
 }

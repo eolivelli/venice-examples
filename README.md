@@ -48,3 +48,63 @@ docker exec -it venice-client bash
 
 - MainWriter: writes a key to the test-store
 - MainReader: read the same key to the test-store
+
+
+## Setting up the Pulsar Sink with an AVRO payload
+
+### Init the store
+
+First of all you have to create an empty store, the key is a STRING and the value is a record of type "Person"
+```
+docker exec -it venice-client bash
+
+STORENAME=test-store-persons
+CONTROLLERURL=http://venice-controller:5555
+CLUSTER=venice-cluster0
+
+echo '{"name": "key","type": "string"}' > key.avsc
+echo '{"type":"record","name":"Person","namespace":"org.example.WriteKeyValue","fields":[{"name":"age","type":"int"},{"name":"name","type":["null","string"],"default":null}]}' > persons.avsc
+
+./create-store.sh $CONTROLLERURL $CLUSTER $STORENAME key.avsc persons.avsc
+java -jar /opt/venice/bin/venice-admin-tool-all.jar --empty-push --url $CONTROLLERURL --cluster $CLUSTER --store test-store-persons  --push-id init --store-size 1000
+```
+
+### Start Pulsar standalone
+
+Start Pulsar Standalone on localhost
+
+```
+bin/pulsar standalone -nss
+```
+
+### Start the Pulsar Sink
+
+```
+cd pulsar-venice-sink
+./deploy_pulsar_standalone.sh
+```
+
+The script deploys the Sink on localhost
+
+You can check the logs
+
+```
+tail -f  logs/functions/public/default/venice/venice-0.log 
+```
+
+### Generate Data To Pulsar
+
+Use the WriteKeyValue java file to generate data to the `people`
+Follow the logs on the Sink
+
+### Read the data from Venice
+
+You can use MainReader and set
+
+```
+String storeName = "test-store-persons";
+String[] keys = {"name0"};
+```
+
+
+

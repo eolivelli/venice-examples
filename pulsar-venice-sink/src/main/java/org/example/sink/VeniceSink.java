@@ -2,7 +2,10 @@ package org.example.sink;
 
 import com.linkedin.venice.meta.Version;
 import com.linkedin.venice.utils.Utils;
+import com.linkedin.venice.writer.VeniceWriter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.avro.Schema;
+import org.apache.avro.generic.GenericRecord;
 import org.apache.pulsar.client.api.schema.GenericObject;
 import org.apache.pulsar.common.schema.KeyValue;
 import org.apache.pulsar.functions.api.Record;
@@ -38,20 +41,58 @@ public class VeniceSink implements Sink<GenericObject> {
                 .getClosableProducer(systemName, new MapConfig(getConfig(this.config.getStoreName(),
                         systemName)), null);
         this.producer.start();
+        String kafkaBootstrapServers = this.producer.getKafkaBootstrapServers();
+        log.info("Connected to Kafka {}", kafkaBootstrapServers);
+
+        VeniceWriter<byte[], byte[], byte[]> veniceWriter = this.producer.getInternalProducer();
+        String topicName = veniceWriter.getTopicName();
+        log.info("Kafka topic name is {}", topicName);
     }
 
     @Override
     public void write(Record<GenericObject> record) throws Exception {
         Object nativeObject = record.getValue().getNativeObject();
-        Object key = record.getKey();
-        Object value = record.getValue();
+        Object key;
+        Object value;
         if (nativeObject instanceof KeyValue) {
             KeyValue keyValue = (KeyValue) nativeObject;
-            key = keyValue.getKey();
-            value = keyValue.getValue();
+            key = extract(keyValue.getKey());
+            value = extract(keyValue.getValue());
+        } else {
+            // this is a string
+            key = record.getKey();
+            value = extract(record.getValue());
         }
-        log.info("Writing key: {} value {}", key, value);
-        producer.put(key, value).get();
+        dumpSchema("key", key);
+        dumpSchema("value", value);
+        if (value == null) {
+            // here we are making it explicit, but "put(key, null) means DELETE in the API"
+            log.info("Deleting key: {}", key);
+            producer.delete(key).get();
+        } else {
+            log.info("Writing key: {} value {}", key, value);
+            producer.put(key, value).get();
+        }
+    }
+
+    private static void dumpSchema(String prefix, Object key) {
+        if (key instanceof GenericRecord) {
+            GenericRecord record = (GenericRecord) key;
+            Schema schema = record.getSchema();
+            log.info("Schema for {}: {}", prefix, schema.toString());
+        }
+    }
+
+    private static Object extract(Object o) {
+        if (o instanceof GenericRecord) {
+            return (GenericRecord) o;
+        }
+        // Pulsar GenericRecord is a wrapper over AVRO GenericRecord
+        if (o instanceof org.apache.pulsar.client.api.schema.GenericRecord) {
+            return ((org.apache.pulsar.client.api.schema.GenericRecord) o).getNativeObject();
+        }
+
+        return o;
     }
 
     @Override

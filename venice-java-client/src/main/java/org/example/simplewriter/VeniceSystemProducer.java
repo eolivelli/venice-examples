@@ -1,5 +1,6 @@
 package org.example.simplewriter;
 
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.linkedin.avroutil1.compatibility.AvroCompatibilityHelper;
 import com.linkedin.d2.balancer.D2Client;
 import com.linkedin.d2.balancer.D2ClientBuilder;
@@ -37,6 +38,7 @@ import com.linkedin.venice.utils.concurrent.VeniceConcurrentHashMap;
 import com.linkedin.venice.writer.CompletableFutureCallback;
 import com.linkedin.venice.writer.VeniceWriter;
 import com.linkedin.venice.writer.VeniceWriterFactory;
+import lombok.Getter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
 import org.apache.avro.generic.IndexedRecord;
@@ -117,6 +119,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private final String runningFabric;
   private final boolean verifyLatestProtocolPresent;
   private final Map<String, D2ClientEnvelope> d2ZkHostToClientEnvelopeMap = new HashMap<>();
+  @Getter
   private final VeniceConcurrentHashMap<Schema, Pair<Integer, Integer>> valueSchemaIds =
       new VeniceConcurrentHashMap<>();
   /**
@@ -126,6 +129,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private final Map<String, VeniceAvroKafkaSerializer> serializers = new VeniceConcurrentHashMap<>();
 
   // Mutable, lazily initialized, state
+  @Getter
   private Schema keySchema;
   private String canonicalKeySchemaStr;
   // To avoid the excessive usage of the cache in case each message is using a unique key schema
