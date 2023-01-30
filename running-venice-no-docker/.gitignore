@@ -1,0 +1,4 @@
+rocksdb/**
+lib/**
+bin/**
+*.log
