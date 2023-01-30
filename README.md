@@ -31,7 +31,7 @@ PULSARHOME=WHERE-YOU-HAVE-PULSAR
 $PULSARHOME/bin/pulsar standalone -nss
 ```
 
-## Start the cluster
+## Start the cluster using docker
 
 ```
 git clone https://github.com/eolivelli/venice-examples
@@ -77,4 +77,12 @@ String[] keys = {"name0"};
 ```
 
 
+### Running Venice locally with DataStax Starlight for Kafka
 
+You can also run Venice without docker.
+
+- Start Pulsar Standalone locally, with the [Starlight-for-Kafka](https://github.com/datastax/starlight-for-kafka) plugin
+- Run Venice using the scripts inside [running-venice-no-docker](running-venice-no-docker) directory
+- Use the "prepare.sh" to get the binaries from your Venice code directory
+- Run all the services one at a time
+- After then you can run all of the other examples on your Venice cluster
