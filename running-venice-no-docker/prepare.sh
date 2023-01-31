@@ -1,6 +1,17 @@
 #/bin/bash
 
+echo "Using VENICE_HOME=$VENICE_HOME"
+if [ -z "$VENICE_HOME" ];
+then
+   echo "Please set VENICE_HOME to a venice repository"
+   exit 
+fi
+
 set -e -x
+
+pushd $VENICE_HOME
+./gradlew shadowJar
+popd
 
 rm -Rf bin
 mkdir bin
