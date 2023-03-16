@@ -1,5 +1,1 @@
-{
-"veniceRouterUrl":"http://venice-router:7777",
-"veniceZookeeper":"zookeeper:2181",
-"storeName":"test-store-persons"
-}
+{"veniceRouterUrl":"http://venice-router:7777","storeName":"test1"}

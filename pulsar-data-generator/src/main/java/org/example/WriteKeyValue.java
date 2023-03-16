@@ -23,15 +23,19 @@ public class WriteKeyValue
 
     public static void main( String[] args ) throws Exception {
 
-        String destTopic = "people";
+        String url = args[0];
+        String destTopic = args[1];
+        System.out.println("URL "+url+" destTopic "+destTopic);
 
         PulsarClient client = PulsarClient.builder()
-                .serviceUrl("http://localhost:8080")
+                .serviceUrl(url)
+                .allowTlsInsecureConnection(true)
                 .build();
 
         Schema<Person> personSchema = Schema.AVRO(Person.class);
         String schema = personSchema.getSchemaInfo().getSchemaDefinition();
         log.info("Schema: {}", schema);
+        System.out.println("Schema: "+schema);
 
         Producer<KeyValue<String, Person>> destTopicProducer = client
                 .newProducer(Schema.KeyValue(Schema.STRING, personSchema))
@@ -40,10 +44,13 @@ public class WriteKeyValue
                 .create();
 
         for (int i = 0; i < 10; i++) {
+            System.out.println("Sending " + i);
             Person person = new Person("name" + i, 20 + i * 2 );
             destTopicProducer.send(new KeyValue<>(person.getName(), person));
+            System.out.println("Sent " + i);
         }
 
+        System.out.println("Flush");
         destTopicProducer.flush();
         destTopicProducer.close();
 

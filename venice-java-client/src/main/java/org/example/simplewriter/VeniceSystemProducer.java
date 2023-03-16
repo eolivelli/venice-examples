@@ -1,17 +1,8 @@
 package org.example.simplewriter;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.linkedin.avroutil1.compatibility.AvroCompatibilityHelper;
-import com.linkedin.d2.balancer.D2Client;
-import com.linkedin.d2.balancer.D2ClientBuilder;
-import com.linkedin.venice.D2.D2ClientUtils;
-import com.linkedin.venice.client.store.ClientConfig;
-import com.linkedin.venice.client.store.ClientFactory;
-import com.linkedin.venice.client.store.transport.D2TransportClient;
 import com.linkedin.venice.controllerapi.ControllerClient;
 import com.linkedin.venice.controllerapi.ControllerResponse;
-import com.linkedin.venice.controllerapi.D2ControllerClient;
-import com.linkedin.venice.controllerapi.D2ServiceDiscoveryResponse;
 import com.linkedin.venice.controllerapi.MultiSchemaResponse;
 import com.linkedin.venice.controllerapi.SchemaResponse;
 import com.linkedin.venice.controllerapi.StoreResponse;
@@ -22,10 +13,7 @@ import com.linkedin.venice.partitioner.VenicePartitioner;
 import com.linkedin.venice.pushmonitor.ExecutionStatus;
 import com.linkedin.venice.pushmonitor.HybridStoreQuotaStatus;
 import com.linkedin.venice.samza.SamzaExitMode;
-import com.linkedin.venice.schema.SchemaReader;
 import com.linkedin.venice.security.SSLFactory;
-import com.linkedin.venice.serialization.avro.AvroProtocolDefinition;
-import com.linkedin.venice.serialization.avro.SchemaPresenceChecker;
 import com.linkedin.venice.serialization.avro.VeniceAvroKafkaSerializer;
 import com.linkedin.venice.utils.BoundedHashMap;
 import com.linkedin.venice.utils.Pair;
@@ -38,6 +26,7 @@ import com.linkedin.venice.utils.concurrent.VeniceConcurrentHashMap;
 import com.linkedin.venice.writer.CompletableFutureCallback;
 import com.linkedin.venice.writer.VeniceWriter;
 import com.linkedin.venice.writer.VeniceWriterFactory;
+import com.linkedin.venice.writer.VeniceWriterOptions;
 import lombok.Getter;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericDatumWriter;
@@ -46,7 +35,6 @@ import org.apache.avro.io.BinaryEncoder;
 import org.apache.avro.io.DatumWriter;
 import org.apache.avro.util.Utf8;
 import org.apache.commons.io.FileUtils;
-import org.apache.kafka.clients.producer.Callback;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.samza.SamzaException;
@@ -59,7 +47,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -71,22 +58,6 @@ import static com.linkedin.venice.ConfigKeys.KAFKA_BOOTSTRAP_SERVERS;
 import static com.linkedin.venice.schema.AvroSchemaParseUtils.parseSchemaFromJSONLooseValidation;
 import static com.linkedin.venice.schema.AvroSchemaParseUtils.parseSchemaFromJSONStrictValidation;
 
-
-/**
- * {@code VeniceSystemProducer} defines the interfaces for Samza jobs to send data to Venice stores.
- *
- * Samza jobs talk to either parent or child controller depending on the aggregate mode config.
- * The decision of which controller should be used is made in {@link VeniceSystemFactory}.
- * The "Primary Controller" term is used to refer to whichever controller the Samza job should talk to.
- *
- * The primary controller should be:
- * 1. The parent controller when the Venice system is deployed in a multi-colo mode and either:
- *     a. {@link Version.PushType} is {@link Version.PushType.BATCH} or {@link Version.PushType.STREAM_REPROCESSING}; or
- *     b. @deprecated {@link Version.PushType} is {@link Version.PushType.STREAM} and the job is configured to write data in AGGREGATE mode
- * 2. The child controller when either:
- *     a. The Venice system is deployed in a single-colo mode; or
- *     b. The {@link Version.PushType} is {@link Version.PushType.STREAM} and the job is configured to write data in NON_AGGREGATE mode
- */
 public class VeniceSystemProducer implements SystemProducer, Closeable {
   private static final Logger LOGGER = LogManager.getLogger(VeniceSystemProducer.class);
 
@@ -114,7 +85,6 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private final Optional<String> partitioners;
   private final Time time;
   private final String runningFabric;
-  private final Map<String, D2ClientEnvelope> d2ZkHostToClientEnvelopeMap = new HashMap<>();
   @Getter
   private final VeniceConcurrentHashMap<Schema, Pair<Integer, Integer>> valueSchemaIds =
       new VeniceConcurrentHashMap<>();
@@ -262,8 +232,13 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
         store.getPartitionerClass(),
         amplificationFactor,
         new VeniceProperties(partitionerProperties));
+    VeniceWriterOptions writerOptions = new VeniceWriterOptions.Builder(store.getKafkaTopic()).setTime(time)
+            .setPartitioner(venicePartitioner)
+            .setPartitionCount(partitionCount.orElse(null))
+            .setChunkingEnabled(isChunkingEnabled)
+            .build();
     return new VeniceWriterFactory(veniceWriterProperties)
-        .createBasicVeniceWriter(store.getKafkaTopic(), time, isChunkingEnabled, venicePartitioner, partitionCount);
+        .createVeniceWriter(writerOptions);
   }
 
   @Override
@@ -390,7 +365,6 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     }
     Utils.closeQuietlyWithErrorLogged(controllerClient);
     hybridStoreQuotaMonitor.ifPresent(Utils::closeQuietlyWithErrorLogged);
-    d2ZkHostToClientEnvelopeMap.values().forEach(Utils::closeQuietlyWithErrorLogged);
   }
 
   @Override
@@ -460,7 +434,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
 
     byte[] key = serializeObject(topicName, keyObject);
     final CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-    final Callback callback = new CompletableFutureCallback(completableFuture);
+    final CompletableFutureCallback callback = new CompletableFutureCallback(completableFuture);
 
     long logicalTimestamp = -1;
     if (valueObject instanceof VeniceObjectWithTimestamp) {
@@ -629,39 +603,4 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     return this.veniceWriter;
   }
 
-  private D2Client getStartedD2Client(String d2ZkHost) {
-    D2ClientEnvelope d2ClientEnvelope = d2ZkHostToClientEnvelopeMap.computeIfAbsent(d2ZkHost, zkHost -> {
-      String fsBasePath = Utils.getUniqueTempPath("d2");
-      D2Client d2Client = new D2ClientBuilder().setZkHosts(d2ZkHost)
-          .setSSLContext(sslFactory.map(SSLFactory::getSSLContext).orElse(null))
-          .setIsSSLEnabled(sslFactory.isPresent())
-          .setSSLParameters(sslFactory.map(SSLFactory::getSSLParameters).orElse(null))
-          .setFsBasePath(fsBasePath)
-          .setEnableSaveUriDataOnDisk(true)
-          .build();
-      D2ClientUtils.startClient(d2Client);
-      return new D2ClientEnvelope(d2Client, fsBasePath);
-    });
-    return d2ClientEnvelope.d2Client;
-  }
-
-  private static final class D2ClientEnvelope implements Closeable {
-    D2Client d2Client;
-    String fsBasePath;
-
-    D2ClientEnvelope(D2Client d2Client, String fsBasePath) {
-      this.d2Client = d2Client;
-      this.fsBasePath = fsBasePath;
-    }
-
-    @Override
-    public void close() throws IOException {
-      D2ClientUtils.shutdownClient(d2Client);
-      try {
-        FileUtils.deleteDirectory(new File(fsBasePath));
-      } catch (IOException e) {
-        LOGGER.info("Error in cleaning up: {}", fsBasePath);
-      }
-    }
-  }
 }

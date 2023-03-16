@@ -14,12 +14,12 @@ public class MainReader {
     public static void main(String[] args) {
         try {
 
-            String storeName = "test-store";
-            String[] keys = {"one"};
+            //String storeName = "test-store";
+            //String[] keys = {"one"};
 
             // use this values for the Pulsar Sink demo
-            //String storeName = "test-store-persons";
-            //String[] keys = {"name0"};
+            String storeName = "test-store-persons";
+            String[] keys = {"name0"};
 
 
             ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
