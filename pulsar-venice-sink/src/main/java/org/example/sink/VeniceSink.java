@@ -12,11 +12,13 @@ import org.apache.pulsar.functions.api.Record;
 import org.apache.pulsar.io.core.Sink;
 import org.apache.pulsar.io.core.SinkContext;
 import org.apache.samza.config.MapConfig;
+import org.checkerframework.checker.units.qual.A;
 import org.example.simplewriter.VeniceSystemFactory;
 import org.example.simplewriter.VeniceSystemProducer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.linkedin.venice.CommonConfigKeys.SSL_ENABLED;
 import static org.example.simplewriter.VeniceSystemFactory.DEPLOYMENT_ID;
@@ -31,6 +33,8 @@ public class VeniceSink implements Sink<GenericObject> {
 
     VeniceSinkConfig config;
     VeniceSystemProducer producer;
+
+    AtomicInteger count = new AtomicInteger();
 
     @Override
     public void open(Map<String, Object> config, SinkContext sinkContext) throws Exception {
@@ -63,15 +67,31 @@ public class VeniceSink implements Sink<GenericObject> {
             key = record.getKey();
             value = extract(record.getValue());
         }
-        dumpSchema("key", key);
-        dumpSchema("value", value);
+        //dumpSchema("key", key);
+        //dumpSchema("value", value);
         if (value == null) {
             // here we are making it explicit, but "put(key, null) means DELETE in the API"
-            log.info("Deleting key: {}", key);
-            producer.delete(key).get();
+            //log.info("Deleting key: {}", key);
+            producer.delete(key).whenComplete((___, error) -> {
+                if (error != null) {
+                    record.fail();
+                } else {
+                    record.ack();
+                }
+            });
         } else {
-            log.info("Writing key: {} value {}", key, value);
-            producer.put(key, value).get();
+            //log.info("Writing key: {} value {}", key, value);
+            producer.put(key, value).whenComplete((___, error) -> {
+                if (count.incrementAndGet() % 1000 == 0) {
+                    log.info("written {} records", count);
+                }
+                if (error != null) {
+                    log.error("error", error);
+                    record.fail();
+                } else {
+                    record.ack();
+                }
+            });
         }
     }
 
