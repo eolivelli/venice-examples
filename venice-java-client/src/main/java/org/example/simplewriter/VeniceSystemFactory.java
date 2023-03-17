@@ -5,6 +5,7 @@ import com.linkedin.venice.meta.Version;
 import com.linkedin.venice.security.SSLFactory;
 import com.linkedin.venice.utils.Pair;
 import com.linkedin.venice.utils.SslUtils;
+import com.linkedin.venice.utils.SystemTime;
 import com.linkedin.venice.utils.concurrent.VeniceConcurrentHashMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -164,7 +165,8 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
       String samzaJobId,
       String runningFabric,
       Optional<SSLFactory> sslFactory,
-      Optional<String> partitioners) {
+      Optional<String> partitioners,
+      Config config) {
     return new VeniceSystemProducer(
         storeName,
         venicePushType,
@@ -172,7 +174,9 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
         runningFabric,
         this,
         sslFactory,
-        partitioners);
+        partitioners,
+        SystemTime.INSTANCE,
+        config);
   }
 
   /**
@@ -237,7 +241,8 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
         samzaJobId,
         runningFabric,
         sslFactory,
-        partitioners);
+        partitioners,
+        config);
     this.systemProducerStatues.computeIfAbsent(systemProducer, k -> Pair.create(true, false));
     return systemProducer;
   }

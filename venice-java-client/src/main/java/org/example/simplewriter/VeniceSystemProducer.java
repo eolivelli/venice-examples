@@ -38,6 +38,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.samza.SamzaException;
+import org.apache.samza.config.Config;
+import org.apache.samza.config.MapConfig;
 import org.apache.samza.system.OutgoingMessageEnvelope;
 import org.apache.samza.system.SystemProducer;
 
@@ -83,6 +85,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private final Optional<SSLFactory> sslFactory;
   private final VeniceSystemFactory factory;
   private final Optional<String> partitioners;
+  private final Config config;
   private final Time time;
   private final String runningFabric;
   @Getter
@@ -134,7 +137,8 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
         factory,
         sslFactory,
         partitioners,
-        SystemTime.INSTANCE);
+        SystemTime.INSTANCE,
+        new MapConfig(new HashMap<>()));
   }
 
   /**
@@ -156,7 +160,8 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
       VeniceSystemFactory factory,
       Optional<SSLFactory> sslFactory,
       Optional<String> partitioners,
-      Time time) {
+      Time time,
+      Config config) {
     this.storeName = storeName;
     this.pushType = pushType;
     this.samzaJobId = samzaJobId;
@@ -165,6 +170,8 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     this.sslFactory = sslFactory;
     this.partitioners = partitioners;
     this.time = time;
+    this.config = config;
+
   }
 
   public String getRunningFabric() {
@@ -207,6 +214,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   protected VeniceWriter<byte[], byte[], byte[]> getVeniceWriter(VersionCreationResponse store) {
     Properties veniceWriterProperties = new Properties();
     veniceWriterProperties.put(KAFKA_BOOTSTRAP_SERVERS, store.getKafkaBootstrapServers());
+    config.forEach((key, value) -> veniceWriterProperties.put(key, value));
     return getVeniceWriter(store, veniceWriterProperties);
   }
 

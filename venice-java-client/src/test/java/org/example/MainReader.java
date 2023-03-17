@@ -18,12 +18,12 @@ public class MainReader {
             //String[] keys = {"one"};
 
             // use this values for the Pulsar Sink demo
-            String storeName = "test-store-persons";
+            String storeName = "store1";
             String[] keys = {"name0"};
 
 
             ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
-            clientConfig.setVeniceURL("http://venice-router:7777");
+            clientConfig.setVeniceURL("http://localhost:7777");
             clientConfig.setForceClusterDiscoveryAtStartTime(true);
             AvroGenericStoreClient<Object, Object> store = ClientFactory.getAndStartGenericAvroClient(clientConfig);
             System.out.println("Store: " + store);

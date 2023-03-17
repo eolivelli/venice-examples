@@ -1,1 +1,1 @@
-{"veniceRouterUrl":"http://venice-router:7777","storeName":"test1"}
+{"veniceRouterUrl":"http://venice-router:7777","storeName":"store3","kafkaSaslConfig": "something"}

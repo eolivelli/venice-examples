@@ -50,9 +50,9 @@ public class VeniceSinkConfig implements Serializable {
 
     @FieldDoc(
             defaultValue = "",
-            help = "The url of the ZK service used by Venice"
+            help = "SASL configuration for Kafka"
     )
-    private String veniceZookeeper = "zookeeper:2181";
+    private String kafkaSaslConfig = "";
 
     @FieldDoc(
         defaultValue = "",
