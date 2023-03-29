@@ -1,3 +1,3 @@
 set -x
-export PULSAR_STANDALONE_CONF=$(realpath pulsar/standalone.conf)
-$PULSAR_HOME/bin/pulsar standalone -nfw -nss 
+HERE=$(dirname $0)
+PULSAR_STANDALONE_CONF=$(realpath $HERE/standalone.conf) $PULSAR_HOME/bin/pulsar standalone -nss  --wipe-data
