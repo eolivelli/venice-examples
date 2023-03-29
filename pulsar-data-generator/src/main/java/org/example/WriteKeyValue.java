@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pulsar.client.api.AuthenticationFactory;
 import org.apache.pulsar.client.api.Producer;
 import org.apache.pulsar.client.api.PulsarClient;
 import org.apache.pulsar.client.api.Schema;
+import org.apache.pulsar.client.impl.AuthenticationUtil;
+import org.apache.pulsar.client.impl.auth.AuthenticationDisabled;
 import org.apache.pulsar.common.schema.KeyValue;
 
 @Slf4j
@@ -26,9 +29,11 @@ public class WriteKeyValue
         String url = args[0];
         String destTopic = args[1];
         System.out.println("URL "+url+" destTopic "+destTopic);
+        String token = args.length > 2 ? args[2] : null;
 
         PulsarClient client = PulsarClient.builder()
                 .serviceUrl(url)
+                .authentication(token != null ? AuthenticationFactory.token(token) : new AuthenticationDisabled())
                 .allowTlsInsecureConnection(true)
                 .build();
 
