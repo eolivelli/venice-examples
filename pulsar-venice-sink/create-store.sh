@@ -5,7 +5,7 @@ set -x
 jar=$(realpath target/*venice-admin*.jar)
 url=http://localhost:5555
 clusterName=venice-cluster0
-storeName=test-store-persons-2
+storeName=t1.n1.s1
 keySchema=key.avsc
 valueSchema=value.avsc
 

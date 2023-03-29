@@ -18,7 +18,7 @@ public class MainReader {
             //String[] keys = {"one"};
 
             // use this values for the Pulsar Sink demo
-            String storeName = "store1";
+            String storeName = "t1.n1.s1";
             String[] keys = {"name0"};
 
 

@@ -73,6 +73,8 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
    */
   public static final String VENICE_STORE = "store";
 
+  public static final String VENICE_DISCOVER_URL_PROP = "venice.discover.urls";
+
   /**
    * Whether to leverage Venice aggregation.
    * By default, it is 'false'.
@@ -161,6 +163,7 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
    */
   protected SystemProducer createSystemProducer(
       String storeName,
+      String discoveryUrls,
       Version.PushType venicePushType,
       String samzaJobId,
       String runningFabric,
@@ -169,6 +172,7 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
       Config config) {
     return new VeniceSystemProducer(
         storeName,
+        discoveryUrls,
         venicePushType,
         samzaJobId,
         runningFabric,
@@ -235,8 +239,11 @@ public class VeniceSystemFactory implements SystemFactory, Serializable {
     }
     LOGGER.info("Final Running Fabric: {}", runningFabric);
 
+    String discoveryUrls = config.get(VENICE_DISCOVER_URL_PROP);
+
     SystemProducer systemProducer = createSystemProducer(
         storeName,
+        discoveryUrls,
         venicePushType,
         samzaJobId,
         runningFabric,

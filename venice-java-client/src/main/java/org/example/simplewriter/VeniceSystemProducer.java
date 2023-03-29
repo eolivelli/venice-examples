@@ -80,6 +80,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
 
   // Immutable state
   private final String storeName;
+  private final String discoveryUrls;
   private final String samzaJobId;
   private final Version.PushType pushType;
   private final Optional<SSLFactory> sslFactory;
@@ -119,29 +120,6 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private Optional<RouterBasedHybridStoreQuotaMonitor> hybridStoreQuotaMonitor = Optional.empty();
 
   /**
-   * Construct a new instance of {@link VeniceSystemProducer}.
-   */
-  public VeniceSystemProducer(
-      String storeName,
-      Version.PushType pushType,
-      String samzaJobId,
-      String runningFabric,
-      VeniceSystemFactory factory,
-      Optional<SSLFactory> sslFactory,
-      Optional<String> partitioners) {
-    this(
-        storeName,
-        pushType,
-        samzaJobId,
-        runningFabric,
-        factory,
-        sslFactory,
-        partitioners,
-        SystemTime.INSTANCE,
-        new MapConfig(new HashMap<>()));
-  }
-
-  /**
    * Construct a new instance of {@link VeniceSystemProducer}
    * @param storeName The store to write to
    * @param pushType The {@link Version.PushType} to use to write to the store
@@ -154,6 +132,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
    */
   public VeniceSystemProducer(
       String storeName,
+      String discoveryUrls,
       Version.PushType pushType,
       String samzaJobId,
       String runningFabric,
@@ -162,6 +141,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
       Optional<String> partitioners,
       Time time,
       Config config) {
+    this.discoveryUrls = discoveryUrls;
     this.storeName = storeName;
     this.pushType = pushType;
     this.samzaJobId = samzaJobId;
@@ -256,7 +236,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     }
     this.isStarted = true;
     this.controllerClient = ControllerClient
-            .discoverAndConstructControllerClient(storeName, "http://venice-controller:5555",
+            .discoverAndConstructControllerClient(storeName, discoveryUrls,
                     sslFactory, 1);
 
     // Request all the necessary info from Venice Controller

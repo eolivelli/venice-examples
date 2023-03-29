@@ -39,6 +39,7 @@ public class VeniceSink implements Sink<GenericObject> {
     @Override
     public void open(Map<String, Object> config, SinkContext sinkContext) throws Exception {
         this.config = VeniceSinkConfig.load(config, sinkContext);
+        log.info("Starting, config {}", this.config);
         VeniceSystemFactory factory = new VeniceSystemFactory();
         final String systemName = "venice";
         this.producer = factory
@@ -67,6 +68,7 @@ public class VeniceSink implements Sink<GenericObject> {
             key = record.getKey();
             value = extract(record.getValue());
         }
+        log.info("Processing {}", nativeObject);
         //dumpSchema("key", key);
         //dumpSchema("value", value);
         if (value == null) {
@@ -128,21 +130,14 @@ public class VeniceSink implements Sink<GenericObject> {
         config.put(configPrefix + VENICE_PUSH_TYPE, Version.PushType.INCREMENTAL.toString());
         config.put(configPrefix + VENICE_STORE, storeName);
         config.put(configPrefix + VENICE_AGGREGATE, "false");
-        //config.put("venice.parent.d2.zk.hosts", config.getVeniceZookeeper());
-        //config.put("venice.child.d2.zk.hosts", config.getVeniceZookeeper());
-
         config.put("venice.discover.urls", this.config.getVeniceRouterUrl());
-
         config.put(DEPLOYMENT_ID, Utils.getUniqueString("venice-push-id-pulsar-sink"));
         config.put(SSL_ENABLED, "false");
-
         if (this.config.getKafkaSaslConfig() != null && !this.config.getKafkaSaslConfig().isEmpty()) {
-            config.put("kafka.sasl.mechanism", "PLAIN");
-            config.put("kafka.sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule " +
-                    " required username=\"public\" password=\"token:eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcnVzZXIifQ.JQpDWJ9oHD743ZyuIw55Qp0bb8xzP6gK0KIWRniF2WnJB1m3v5MsrpfMlmRIlFc3-htWRAFHCc4E0ipj7JU8HjBqLIvVErRseRG-UTM1EprVkj0mk37jXV3ef7gER0KHn9CUKEQPfmTACeKlQ2oV4_qPAZ6HiEt51vzANfZH24vLCIjiOG77Z4s_w2sfgpiodRmhBLFOg_qnQTfGs7TBDWgu4DRoJ6CYZSEcp8q7j8xp_zNVIFGTRjWskocUvedHS9ZsCGZjzuPvRPp19B0VvAjEjtwpa6j7Khvjf4imjp2QHDnZwpCIEp4DSicwM48F5q4k722IdiyTTsVBWy8Cyg\";");
-            config.put("kafka.security.protocol","SASL_PLAINTEXT");
+            config.put("kafka.sasl.jaas.config", this.config.getKafkaSaslConfig());
         }
-
+        config.put("kafka.sasl.mechanism", this.config.getKafkaSaslMechanism());
+        config.put("kafka.security.protocol", this.config.getKafkaSecurityProtocol());
         log.info("CONFIG: {}", config);
         return config;
     }

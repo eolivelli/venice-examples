@@ -36,7 +36,6 @@ import java.util.Map;
  * Configuration class for the ElasticSearch Sink Connector.
  */
 @Data
-@Accessors(chain = true)
 @Slf4j
 public class VeniceSinkConfig implements Serializable {
 
@@ -50,9 +49,21 @@ public class VeniceSinkConfig implements Serializable {
 
     @FieldDoc(
             defaultValue = "",
-            help = "SASL configuration for Kafka"
+            help = "SASL configuration for Kafka. See Kafka client documentation for details."
     )
     private String kafkaSaslConfig = "";
+
+    @FieldDoc(
+            defaultValue = "",
+            help = "SASL configuration for Kafka. See Kafka client documentation for details."
+    )
+    private String kafkaSaslMechanism = "PLAIN";
+
+    @FieldDoc(
+            defaultValue = "",
+            help = "TLS/SASL configuration for Kafka. See Kafka client documentation for details."
+    )
+    private String kafkaSecurityProtocol = "PLAINTEXT";
 
     @FieldDoc(
         defaultValue = "",
