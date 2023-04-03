@@ -24,18 +24,27 @@ cd docker
 
 ### Start Pulsar standalone
 
-Start Pulsar Standalone on localhost
+Start Pulsar Standalone on localhost with Starlight for Kafka
 
 ```
-PULSARHOME=WHERE-YOU-HAVE-PULSAR
-$PULSARHOME/bin/pulsar standalone -nss
-```
-
-## Start the cluster using docker
-
-```
+export PULSARHOME=WHERE-YOU-HAVE-PULSAR
 git clone https://github.com/eolivelli/venice-examples
-docker compose up
+cp running-venice-no-docker/pulsar
+./run_pulsar_no_auth.sh
+```
+
+## Start the cluster without using Docker
+
+```
+cd running-venice-no-docker
+## copy the binaries from your Venice code directory
+./prepare.sh
+
+# open 3 terminals and run these commands
+./run_controller.sh
+./run_server.sh
+./run_router.sh
+
 ```
 
 ## Init the store
@@ -75,14 +84,3 @@ You can use MainReader and set these values
 String storeName = "test-store-persons";
 String[] keys = {"name0"};
 ```
-
-
-### Running Venice locally with DataStax Starlight for Kafka
-
-You can also run Venice without docker.
-
-- Start Pulsar Standalone locally, with the [Starlight-for-Kafka](https://github.com/datastax/starlight-for-kafka) plugin
-- Run Venice using the scripts inside [running-venice-no-docker](running-venice-no-docker) directory
-- Use the "prepare.sh" to get the binaries from your Venice code directory
-- Run all the services one at a time
-- After then you can run all of the other examples on your Venice cluster
