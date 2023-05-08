@@ -9,76 +9,52 @@ With this set of scripts you will setup:
 - a Venice Standalone cluster with 1 controller, 1 server and 1 router
 - a Pulsar Sink to Venice
 
-## 
+## Download the binaries and prepare
 
 ```
-git clone https://github.com/linkedin/venice
-cd venice
-./gradlew publishToMavenLocal -Pversion=1.1-SNAPSHOT
-cd docker
-./build-venice-docker-images.sh
+./download.sh
+./install.sh
 ```
-
 
 ### Start Pulsar standalone
 
-Start Pulsar Standalone on localhost with Starlight for Kafka
-
 ```
-export PULSARHOME=WHERE-YOU-HAVE-PULSAR
-git clone https://github.com/eolivelli/venice-examples
-cp running-venice-no-docker/pulsar
-./run_pulsar_no_auth.sh
+./run_pulsar.sh
 ```
 
-## Start the cluster without using Docker
+## Start the Venice Cluster
 
 ```
-cd running-venice-no-docker
-## copy the binaries from your Venice code directory
-./prepare.sh
-
-# open 3 terminals and run these commands
-./run_controller.sh
-./run_server.sh
-./run_router.sh
-
+# open a new terminal
+./setup.sh
+./run_venice.sh
 ```
 
-## Init the store
-
-Create the "store" and push some data (this will create the first version of the store):
+## Create the Store and the Pulsar Sink
 
 ```
-cd pulsar-venice-sink
+# open a new terminal
 ./create-store.sh
-
+./deploy-sink.sh
 ```
 
-### Start the Pulsar Sink
+You can see the logs of the Sink heres
 
 ```
-./deploy_pulsar_standalone.sh
+tail -f -n20000 pulsar/logs/functions/public/default/venice/venice-0.log 
 ```
 
-The script deploys the Sink on localhost
+### Generate some data to Pulsar
 
-You can check the logs
-
+The scripts write a KeyValue message to Pulsar, with key=foo1
 ```
-tail -f  $PULSARHOME/logs/functions/public/default/venice/venice-0.log 
+./generate-data.sh
 ```
 
-### Generate Data To Pulsar
 
-Use the WriteKeyValue java file to generate data to the `people`
-Follow the logs on the Sink
+### Read the data from Venice using the HTTP API
 
-### Read the data from Venice
-
-You can use MainReader and set these values
-
+The script reads from the Venice Router using the HTTP API and fetches the record with key=foo1 
 ```
-String storeName = "test-store-persons";
-String[] keys = {"name0"};
+./query_using_http.sh
 ```
