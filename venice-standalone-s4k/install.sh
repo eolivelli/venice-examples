@@ -3,6 +3,9 @@ HERE=$(realpath $(dirname $0))
 
 
 cd $HERE
+rm -Rf tmp
+mkdir tmp
+
 rm -Rf pulsar
 mkdir pulsar
 pushd pulsar
