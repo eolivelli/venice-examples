@@ -2,12 +2,13 @@
 
 set -x
 
-jar=$(realpath target/*venice-admin*.jar)
+jar=$(realpath binaries/*venice-admin*.jar)
 url=http://localhost:5555
 clusterName=venice-cluster0
-storeName=public.default.store1
+storeName=store4
 keySchema=key.avsc
 valueSchema=value.avsc
+token=
 
 # create the store
 java -jar $jar --new-store --url $url --cluster $clusterName  --store $storeName --key-schema-file $keySchema --value-schema-file $valueSchema

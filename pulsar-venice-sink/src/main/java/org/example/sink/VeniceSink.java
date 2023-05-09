@@ -131,6 +131,7 @@ public class VeniceSink implements Sink<GenericObject> {
         config.put(configPrefix + VENICE_STORE, storeName);
         config.put(configPrefix + VENICE_AGGREGATE, "false");
         config.put("venice.discover.urls", this.config.getVeniceRouterUrl());
+        config.put("authentication.token", this.config.getVeniceToken());
         config.put(DEPLOYMENT_ID, Utils.getUniqueString("venice-push-id-pulsar-sink"));
         config.put(SSL_ENABLED, "false");
         if (this.config.getKafkaSaslConfig() != null && !this.config.getKafkaSaslConfig().isEmpty()) {

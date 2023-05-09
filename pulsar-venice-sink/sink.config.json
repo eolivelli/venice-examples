@@ -1,5 +1,1 @@
-{"veniceRouterUrl":"http://venice-controller:5555",
- "storeName":"t1.n1.s1",
- "kafkaSaslConfig": "org.apache.kafka.common.security.plain.PlainLoginModule required username=\"public\" password=\"token:eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzdXBlcnVzZXIifQ.JQpDWJ9oHD743ZyuIw55Qp0bb8xzP6gK0KIWRniF2WnJB1m3v5MsrpfMlmRIlFc3-htWRAFHCc4E0ipj7JU8HjBqLIvVErRseRG-UTM1EprVkj0mk37jXV3ef7gER0KHn9CUKEQPfmTACeKlQ2oV4_qPAZ6HiEt51vzANfZH24vLCIjiOG77Z4s_w2sfgpiodRmhBLFOg_qnQTfGs7TBDWgu4DRoJ6CYZSEcp8q7j8xp_zNVIFGTRjWskocUvedHS9ZsCGZjzuPvRPp19B0VvAjEjtwpa6j7Khvjf4imjp2QHDnZwpCIEp4DSicwM48F5q4k722IdiyTTsVBWy8Cyg\"\";\");"
- "kafkaSaslMechanism": "PLAIN",
- "kafkaSecurityProtocol": "SASL_PLAINTEXT"}
+{"veniceRouterUrl":"http://localhost:5555", "storeName":"public.default.store1"}

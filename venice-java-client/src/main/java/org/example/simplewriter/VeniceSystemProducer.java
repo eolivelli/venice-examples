@@ -84,6 +84,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
   private final String samzaJobId;
   private final Version.PushType pushType;
   private final Optional<SSLFactory> sslFactory;
+  private final String token;
   private final VeniceSystemFactory factory;
   private final Optional<String> partitioners;
   private final Config config;
@@ -151,6 +152,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     this.partitioners = partitioners;
     this.time = time;
     this.config = config;
+    this.token = config.get("authentication.token", "");
 
   }
 
@@ -237,7 +239,7 @@ public class VeniceSystemProducer implements SystemProducer, Closeable {
     this.isStarted = true;
     this.controllerClient = ControllerClient
             .discoverAndConstructControllerClient(storeName, discoveryUrls,
-                    sslFactory, 1);
+                    sslFactory, 1, token);
 
     // Request all the necessary info from Venice Controller
     VersionCreationResponse versionCreationResponse = (VersionCreationResponse) controllerRequestWithRetry(

@@ -55,6 +55,12 @@ public class VeniceSinkConfig implements Serializable {
 
     @FieldDoc(
             defaultValue = "",
+            help = "JWT token to connect to Venice."
+    )
+    private String veniceToken = "";
+
+    @FieldDoc(
+            defaultValue = "",
             help = "SASL configuration for Kafka. See Kafka client documentation for details."
     )
     private String kafkaSaslMechanism = "PLAIN";
