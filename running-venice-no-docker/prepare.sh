@@ -10,7 +10,7 @@ fi
 set -e -x
 
 pushd $VENICE_HOME
-./gradlew shadowJar
+./gradlew shadowJar -x :services:venice-standalone:shadowJar
 popd
 
 rm -Rf bin
