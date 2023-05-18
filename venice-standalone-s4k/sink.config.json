@@ -1,1 +1,1 @@
-{"veniceRouterUrl":"http://localhost:5555", "storeName":"store1"}
+{"veniceDiscoveryUrl":"http://localhost:5555", "veniceRouterUrl":"http://localhost:7777", "storeName":"store1"}

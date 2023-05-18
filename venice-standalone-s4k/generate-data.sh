@@ -5,7 +5,7 @@ PULSARTOPIC=public/default/input
 SCHEMA=$(cat value.avsc)
 JSONFILE=$HERE/tmp/person.json
 AVROFILE=$HERE/tmp/person.avro
-MESSAGEKEY=foo1
+MESSAGEKEY=${1}
 echo '{"name":"foo1-name","age":15}' > $JSONFILE
 cat $JSONFILE &&
 java -jar $HERE/binaries/*avro-tools*.jar jsontofrag "$SCHEMA" $JSONFILE > $AVROFILE
