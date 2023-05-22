@@ -11,6 +11,11 @@ import org.apache.pulsar.client.api.Schema;
 import org.apache.pulsar.client.impl.AuthenticationUtil;
 import org.apache.pulsar.client.impl.auth.AuthenticationDisabled;
 import org.apache.pulsar.common.schema.KeyValue;
+import org.apache.pulsar.common.util.FutureUtil;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 public class WriteKeyValue
@@ -26,8 +31,8 @@ public class WriteKeyValue
 
     public static void main( String[] args ) throws Exception {
 
-        String url = args[0];
-        String destTopic = args[1];
+        String url = args.length > 0 ? args[0] : "pulsar://localhost:6650";
+        String destTopic = args.length > 1 ? args[1] : "public/default/input";
         System.out.println("URL "+url+" destTopic "+destTopic);
         String token = args.length > 2 ? args[2] : null;
 
@@ -48,12 +53,19 @@ public class WriteKeyValue
                 .blockIfQueueFull(true)
                 .create();
 
-        for (int i = 0; i < 10; i++) {
-            System.out.println("Sending " + i);
+        List<CompletableFuture<?>> handles = new ArrayList<>();
+        for (int i = 0; i < 1_000_000; i++) {
+            //System.out.println("Sending " + i);
             Person person = new Person("name" + i, 20 + i * 2 );
-            destTopicProducer.send(new KeyValue<>(person.getName(), person));
-            System.out.println("Sent " + i);
+            handles.add(destTopicProducer.sendAsync(new KeyValue<>(person.getName(), person)));
+            //System.out.println("Sent " + i);
+            if (handles.size() == 10000) {
+                FutureUtil.waitForAll(handles).join();
+                handles.clear();
+                System.out.println("sent "+i);
+            }
         }
+        FutureUtil.waitForAll(handles).join();
 
         System.out.println("Flush");
         destTopicProducer.flush();

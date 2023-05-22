@@ -3,7 +3,9 @@ package org.example;
 import com.linkedin.venice.client.store.AvroGenericStoreClient;
 import com.linkedin.venice.client.store.ClientConfig;
 import com.linkedin.venice.client.store.ClientFactory;
+import com.linkedin.venice.utils.EncodingUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
 public class MainReader {
@@ -18,9 +20,11 @@ public class MainReader {
             //String[] keys = {"one"};
 
             // use this values for the Pulsar Sink demo
-            String storeName = "t1.n1.s1";
-            String[] keys = {"name0"};
+            String storeName = "public.default.store1";
+            String[] keys = {"foo1"};
 
+            String encoded = EncodingUtils.base64EncodeToString(keys[0].getBytes(StandardCharsets.UTF_8));
+            System.out.println("Encoded: " + encoded);
 
             ClientConfig clientConfig = ClientConfig.defaultGenericClientConfig(storeName);
             clientConfig.setVeniceURL("http://localhost:7777");
