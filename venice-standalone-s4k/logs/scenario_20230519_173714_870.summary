@@ -1,0 +1,67 @@
+5/19/23, 5:37:56 PM ============================================================
+
+-- Counters --------------------------------------------------------------------
+venice_reader.yaml.optracker_blocked
+             count = 0
+venice_reader.yaml.read-block--op1.found
+             count = 23
+venice_reader.yaml.read-block--op1.notFound
+             count = 77
+
+-- Histograms ------------------------------------------------------------------
+venice_reader.yaml.tries
+             count = 100
+
+-- Timers ----------------------------------------------------------------------
+venice_reader.yaml.bind
+             count = 100
+venice_reader.yaml.cycles.servicetime
+             count = 100
+venice_reader.yaml.execute
+             count = 100
+venice_reader.yaml.read-block--op1.execute
+             count = 100
+venice_reader.yaml.read_input
+             count = 101
+venice_reader.yaml.result
+             count = 100
+venice_reader.yaml.result-success
+             count = 100
+venice_reader.yaml.strides.servicetime
+             count = 100
+
+
+5/19/23, 5:38:03 PM ============================================================
+
+-- Counters --------------------------------------------------------------------
+venice_reader.yaml.optracker_blocked
+             count = 0
+venice_reader.yaml.read-block--op1.found
+             count = 23
+venice_reader.yaml.read-block--op1.notFound
+             count = 77
+
+-- Histograms ------------------------------------------------------------------
+venice_reader.yaml.tries
+             count = 100
+
+-- Timers ----------------------------------------------------------------------
+venice_reader.yaml.bind
+             count = 100
+venice_reader.yaml.cycles.servicetime
+             count = 100
+venice_reader.yaml.execute
+             count = 100
+venice_reader.yaml.read-block--op1.execute
+             count = 100
+venice_reader.yaml.read_input
+             count = 101
+venice_reader.yaml.result
+             count = 100
+venice_reader.yaml.result-success
+             count = 100
+venice_reader.yaml.strides.servicetime
+             count = 100
+
+
+

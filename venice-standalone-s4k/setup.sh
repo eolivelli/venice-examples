@@ -5,3 +5,4 @@ $PULSAR_HOME/bin/pulsar-admin namespaces set-retention public/default -t -1 -s 1
 $PULSAR_HOME/bin/pulsar-admin topics create-partitioned-topic -p 1 persistent://public/default/venice_admin_venice-cluster0
 $PULSAR_HOME/bin/pulsar-admin topics create-partitioned-topic -p 1 persistent://public/default/venice_system_store_meta_store_store1_rt
 $PULSAR_HOME/bin/pulsar-admin topics create-partitioned-topic -p 1 persistent://public/default/venice_system_store_METADATA_SYSTEM_SCHEMA_STORE_rt
+$PULSAR_HOME/bin/pulsar-admin namespaces set-is-allow-auto-update-schema --enable public/default
