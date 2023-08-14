@@ -1,0 +1,20 @@
+description: |
+  Test workload for pulsar producer and venice reader
+bindings:
+  mykey: Mod(100000); ToString(); Prefix("keys-")
+  payload: AlphaNumericString(10);
+
+blocks:
+  msg-produce-block:
+    ops:
+      op1:
+        MessageProduce: "persistent://public/default/input"
+        producerName: "myProducer"
+        msg_key: "{mykey}"
+        msg_properties: ""
+        msg_value: |
+          {
+              "age": "21",
+              "name": "{payload}"
+          }
+

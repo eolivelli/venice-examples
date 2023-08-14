@@ -1,0 +1,6 @@
+avro==1.11.1
+pulsar-client
+certifi==2023.5.7
+protobuf==4.23.1
+ratelimit==2.2.1
+six==1.16.0
